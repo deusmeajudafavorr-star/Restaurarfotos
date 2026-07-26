@@ -24,6 +24,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
+  // Modal selection state
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -217,61 +220,41 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`relative group px-3 sm:px-8 py-6 sm:py-8 rounded-2xl border-2 border-dashed transition-all duration-300 text-center ${
+          onClick={() => setIsOptionModalOpen(true)}
+          className={`relative group cursor-pointer px-3 sm:px-10 py-6 sm:py-10 rounded-2xl border-2 border-dashed transition-all duration-300 text-center ${
             isDragging
               ? 'border-amber-400 bg-amber-500/10 scale-[1.02]'
-              : 'border-indigo-500/30 bg-slate-950/40 hover:bg-slate-900/80 shadow-inner'
+              : 'border-indigo-500/30 hover:border-amber-400/80 bg-slate-950/40 hover:bg-slate-900/80 shadow-inner'
           }`}
         >
           {/* Subtle hover laser ring */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-          <div className="flex flex-col items-center justify-center gap-5 relative z-10 w-full">
+          <div className="flex flex-col items-center justify-center gap-4 relative z-10 w-full">
             
             {/* Animated Icon Circle */}
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5 shadow-xl group-hover:scale-105 transition-transform duration-300">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5 shadow-xl group-hover:scale-110 transition-transform duration-300">
               <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center">
-                <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-bounce" />
+                <Upload className="w-7 h-7 sm:w-10 sm:h-10 text-amber-400 group-hover:text-white transition-colors animate-bounce" />
               </div>
             </div>
 
-            <div className="text-center max-w-md">
-              <h3 className="text-white font-extrabold text-base sm:text-lg mb-1">
-                Selecione como deseja enviar sua foto:
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Você pode tirar uma foto agora ou escolher uma foto salva no aparelho
-              </p>
-            </div>
+            {/* Upload CTA Button - Bouncing / Animated & Mobile Optimized */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOptionModalOpen(true);
+              }}
+              className="w-full max-w-sm px-4 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-extrabold text-sm sm:text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 animate-bounce cursor-pointer"
+            >
+              <ImageIcon className="w-5 h-5 shrink-0" />
+              <span className="leading-tight text-center">Clique aqui pra enviar foto agora</span>
+              <ArrowRight className="w-5 h-5 shrink-0" />
+            </button>
 
-            {/* TWO ACTION BUTTONS: CAMERA & GALLERY */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-lg">
-              
-              {/* Option 1: Tirar foto pela Câmera */}
-              <button
-                type="button"
-                onClick={() => startCamera('environment')}
-                className="w-full sm:w-1/2 px-5 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer animate-pulse"
-                style={{ animationDuration: '2.5s' }}
-              >
-                <Camera className="w-5 h-5 shrink-0" />
-                <span>Tirar Foto com Câmera</span>
-              </button>
-
-              {/* Option 2: Acessar Galeria / Arquivos */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full sm:w-1/2 px-5 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
-              >
-                <ImageIcon className="w-5 h-5 shrink-0" />
-                <span>Escolher da Galeria</span>
-              </button>
-
-            </div>
-
-            <p className="text-xs text-slate-400 font-medium pt-1">
-              Também pode arrastar e soltar imagens aqui (<strong className="text-slate-200">JPG, JPEG, PNG</strong>)
+            <p className="text-xs sm:text-sm text-slate-400 font-medium px-2">
+              Arraste e solte ou clique para selecionar (Suporta <strong className="text-slate-200">JPG, JPEG, PNG</strong>)
             </p>
           </div>
         </div>
@@ -304,6 +287,70 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
       </div>
+
+      {/* SELECT PHOTO SOURCE MODAL (CAMERA VS GALLERY) */}
+      {isOptionModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative text-center flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setIsOptionModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5 mx-auto mb-3">
+                <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-amber-400" />
+                </div>
+              </div>
+              <h3 className="text-white font-extrabold text-lg sm:text-xl">
+                Como deseja enviar sua foto?
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Escolha uma das opções abaixo para continuar
+              </p>
+            </div>
+
+            {/* OPTIONS (TOP: CAMERA, BOTTOM: GALLERY) */}
+            <div className="flex flex-col gap-3">
+              
+              {/* Option 1 (TOP): Tirar Foto com Câmera */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOptionModalOpen(false);
+                  startCamera('environment');
+                }}
+                className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-base shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
+              >
+                <Camera className="w-5 h-5 shrink-0" />
+                <span>Tirar Foto com Câmera</span>
+              </button>
+
+              {/* Option 2 (BOTTOM): Escolher da Galeria */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOptionModalOpen(false);
+                  fileInputRef.current?.click();
+                }}
+                className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-base shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
+              >
+                <ImageIcon className="w-5 h-5 shrink-0" />
+                <span>Escolher da Galeria</span>
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* LIVE CAMERA MODAL */}
       {isCameraModalOpen && (
