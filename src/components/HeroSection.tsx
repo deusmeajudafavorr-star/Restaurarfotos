@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Image as ImageIcon, ShieldCheck, Sparkles, ArrowRight, Cloud } from 'lucide-react';
-import { BeforeAfterSlider } from './BeforeAfterSlider';
+import { Upload, Image as ImageIcon, ShieldCheck, Sparkles, ArrowRight, Cloud, MessageSquare, ArrowDown } from 'lucide-react';
 
 interface HeroSectionProps {
   onPhotoSelected: (file: File) => void;
@@ -76,9 +75,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </h1>
 
         {/* 1. REQUIRED SUBTITLE */}
-        <p className="text-sm sm:text-base text-slate-300 font-medium max-w-xl mx-auto mb-8 leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-300 font-medium max-w-xl mx-auto mb-4 leading-relaxed">
           Envie sua foto abaixo e veja a prévia restaurada em segundos sem compromisso.
         </p>
+
+        {/* Ver Depoimentos Button */}
+        <div className="mb-8 flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById('depoimentos')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/90 hover:bg-slate-700/90 border border-amber-500/30 text-amber-300 hover:text-amber-200 text-xs sm:text-sm font-semibold transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <MessageSquare className="w-4 h-4 text-amber-400" />
+            <span>Ver depoimentos</span>
+            <ArrowDown className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+          </button>
+        </div>
 
         {/* Hidden File Input */}
         <input
@@ -163,9 +177,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
       </div>
-
-      {/* Interactive Demonstration Slider */}
-      <BeforeAfterSlider />
     </section>
   );
 };

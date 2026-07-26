@@ -27,11 +27,6 @@ export const Header: React.FC<HeaderProps> = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Price Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-semibold shadow-inner">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-            <span>R$ 4,99</span>
-          </div>
         </div>
       </div>
     </header>

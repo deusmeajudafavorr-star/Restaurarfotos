@@ -67,9 +67,21 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
         </h2>
 
         {/* 4. REQUIRED TEXT */}
-        <p className="text-slate-200 text-base sm:text-lg font-medium max-w-lg mx-auto mb-6 leading-relaxed">
+        <p className="text-slate-200 text-base sm:text-lg font-medium max-w-lg mx-auto mb-3 leading-relaxed">
           Para receber sua foto restaurada e o vídeo em alta qualidade, clique no botão abaixo.
         </p>
+
+        {/* Circled requested text callout */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={handleWhatsAppClick}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-300 hover:text-emerald-200 font-extrabold text-sm sm:text-base transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 animate-pulse"
+          >
+            <MessageSquare className="w-4 h-4 text-emerald-400 fill-emerald-400" />
+            <span>Clique aqui Receber no whatsapp</span>
+          </button>
+        </div>
 
         {/* Dynamic Order Number Display */}
         <div className="mb-8 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 max-w-sm mx-auto flex items-center justify-between gap-3">

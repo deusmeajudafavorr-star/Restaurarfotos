@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { ProcessingView } from './components/ProcessingView';
 import { SuccessView } from './components/SuccessView';
+import { TestimonialsSection } from './components/TestimonialsSection';
 import { SettingsModal } from './components/SettingsModal';
 import { uploadToImageKit } from './utils/imagekit';
 import { generateOrderCode } from './utils/orderGenerator';
@@ -116,21 +117,24 @@ export default function App() {
         )}
       </main>
 
-      {/* FAQ & Trust Section */}
+      {/* Testimonials & FAQ Section */}
       {step === 'upload' && (
-        <section className="py-12 px-4 max-w-4xl mx-auto border-t border-slate-900 w-full text-center">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center justify-center gap-2">
-            <HelpCircle className="w-5 h-5 text-amber-400" />
-            <span>Perguntas Frequentes</span>
-          </h3>
+        <>
+          <TestimonialsSection />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-            <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
-              <h4 className="font-bold text-sm text-amber-300 mb-1">Como funciona o pagamento de R$ 5?</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Você envia sua foto, a IA gera a restauração e o vídeo em movimento. Você visualiza a confirmação e só efetua o pagamento ao receber via WhatsApp.
-              </p>
-            </div>
+          <section className="py-12 px-4 max-w-4xl mx-auto border-t border-slate-900 w-full text-center">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center justify-center gap-2">
+              <HelpCircle className="w-5 h-5 text-amber-400" />
+              <span>Perguntas Frequentes</span>
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
+                <h4 className="font-bold text-sm text-amber-300 mb-1">Como funciona o pagamento de R$ 4,99?</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Você envia sua foto, a IA gera a restauração e o vídeo em movimento. Você visualiza a confirmação e só efetua o pagamento ao receber via WhatsApp.
+                </p>
+              </div>
 
             <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
               <h4 className="font-bold text-sm text-indigo-300 mb-1">O que vem no resultado?</h4>
@@ -154,7 +158,8 @@ export default function App() {
             </div>
           </div>
         </section>
-      )}
+      </>
+    )}
 
       {/* Footer */}
       <footer className="py-6 px-4 bg-slate-950 border-t border-slate-900 text-center text-xs text-slate-500">
