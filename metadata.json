@@ -1,6 +1,8 @@
 {
   "name": "Restaurador de Fotos & Vídeo IA",
   "description": "Restaure suas fotos antigas e gere vídeos animados com IA por apenas R$ 5.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": [
+    "camera"
+  ],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

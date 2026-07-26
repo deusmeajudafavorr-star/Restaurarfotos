@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Upload, Image as ImageIcon, ShieldCheck, Sparkles, ArrowRight, Cloud, MessageSquare, ArrowDown } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Upload, Image as ImageIcon, ShieldCheck, Sparkles, ArrowRight, Cloud, MessageSquare, ArrowDown, Camera, X, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 interface HeroSectionProps {
   onPhotoSelected: (file: File) => void;
@@ -9,8 +9,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onPhotoSelected,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const [isDragging, setIsDragging] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Live Camera Modal states
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
+  const [capturedFile, setCapturedFile] = useState<File | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,9 +32,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   const validateAndProcessFile = (file: File) => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    if (!validTypes.includes(file.type.toLowerCase())) {
-      setErrorMsg('Por favor, selecione apenas imagens no formato JPG, JPEG ou PNG.');
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
+    if (!file.type.startsWith('image/')) {
+      setErrorMsg('Por favor, selecione uma imagem válida (JPG, JPEG, PNG).');
       return;
     }
     setErrorMsg(null);
@@ -45,6 +57,86 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     if (file) {
       validateAndProcessFile(file);
     }
+  };
+
+  // Start Live Web Camera
+  const startCamera = async (facing: 'environment' | 'user' = 'environment') => {
+    stopCamera();
+    setCameraError(null);
+    setCapturedPhotoUrl(null);
+    setCapturedFile(null);
+    setIsCameraModalOpen(true);
+
+    try {
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: { ideal: facing },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+        audio: false,
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err: any) {
+      console.warn('Câmera via getUserMedia indisponível, abrindo suporte nativo:', err);
+      // Fallback: use native camera file input
+      stopCamera();
+      setIsCameraModalOpen(false);
+      cameraInputRef.current?.click();
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  // Capture Photo from Video Stream
+  const takeSnap = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const timestamp = new Date().getTime();
+          const file = new File([blob], `foto_camera_${timestamp}.jpg`, { type: 'image/jpeg' });
+          setCapturedFile(file);
+          setCapturedPhotoUrl(URL.createObjectURL(blob));
+        }
+      }, 'image/jpeg', 0.95);
+    }
+  };
+
+  const confirmCapturedPhoto = () => {
+    if (capturedFile) {
+      stopCamera();
+      setIsCameraModalOpen(false);
+      validateAndProcessFile(capturedFile);
+    }
+  };
+
+  const toggleFacingMode = () => {
+    const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(nextFacing);
+    startCamera(nextFacing);
   };
 
   return (
@@ -94,12 +186,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </button>
         </div>
 
-        {/* Hidden File Input */}
+        {/* Hidden File Input for Gallery */}
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
-          accept="image/jpeg, image/jpg, image/png"
+          accept="image/*"
+          className="hidden"
+        />
+
+        {/* Hidden Camera Input for direct mobile device camera */}
+        <input
+          type="file"
+          ref={cameraInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          capture="environment"
           className="hidden"
         />
 
@@ -115,36 +217,61 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`relative group cursor-pointer px-3 sm:px-10 py-6 sm:py-10 rounded-2xl border-2 border-dashed transition-all duration-300 text-center ${
+          className={`relative group px-3 sm:px-8 py-6 sm:py-8 rounded-2xl border-2 border-dashed transition-all duration-300 text-center ${
             isDragging
               ? 'border-amber-400 bg-amber-500/10 scale-[1.02]'
-              : 'border-indigo-500/30 hover:border-amber-400/80 bg-slate-950/40 hover:bg-slate-900/80 shadow-inner'
+              : 'border-indigo-500/30 bg-slate-950/40 hover:bg-slate-900/80 shadow-inner'
           }`}
         >
           {/* Subtle hover laser ring */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-          <div className="flex flex-col items-center justify-center gap-4 relative z-10 w-full">
+          <div className="flex flex-col items-center justify-center gap-5 relative z-10 w-full">
+            
             {/* Animated Icon Circle */}
-            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5 shadow-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 p-0.5 shadow-xl group-hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center">
-                <Upload className="w-7 h-7 sm:w-10 sm:h-10 text-amber-400 group-hover:text-white transition-colors animate-bounce" />
+                <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-bounce" />
               </div>
             </div>
 
-            {/* Upload CTA Button - Bouncing / Animated & Mobile Optimized */}
-            <button
-              type="button"
-              className="w-full max-w-sm px-4 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-extrabold text-sm sm:text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 animate-bounce cursor-pointer"
-            >
-              <ImageIcon className="w-5 h-5 shrink-0" />
-              <span className="leading-tight text-center">Clique aqui pra enviar foto agora</span>
-              <ArrowRight className="w-5 h-5 shrink-0" />
-            </button>
+            <div className="text-center max-w-md">
+              <h3 className="text-white font-extrabold text-base sm:text-lg mb-1">
+                Selecione como deseja enviar sua foto:
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Você pode tirar uma foto agora ou escolher uma foto salva no aparelho
+              </p>
+            </div>
 
-            <p className="text-xs sm:text-sm text-slate-400 font-medium px-2">
-              Arraste e solte ou clique para selecionar (Suporta <strong className="text-slate-200">JPG, JPEG, PNG</strong>)
+            {/* TWO ACTION BUTTONS: CAMERA & GALLERY */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-lg">
+              
+              {/* Option 1: Tirar foto pela Câmera */}
+              <button
+                type="button"
+                onClick={() => startCamera('environment')}
+                className="w-full sm:w-1/2 px-5 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer animate-pulse"
+                style={{ animationDuration: '2.5s' }}
+              >
+                <Camera className="w-5 h-5 shrink-0" />
+                <span>Tirar Foto com Câmera</span>
+              </button>
+
+              {/* Option 2: Acessar Galeria / Arquivos */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full sm:w-1/2 px-5 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                <ImageIcon className="w-5 h-5 shrink-0" />
+                <span>Escolher da Galeria</span>
+              </button>
+
+            </div>
+
+            <p className="text-xs text-slate-400 font-medium pt-1">
+              Também pode arrastar e soltar imagens aqui (<strong className="text-slate-200">JPG, JPEG, PNG</strong>)
             </p>
           </div>
         </div>
@@ -177,7 +304,114 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
       </div>
+
+      {/* LIVE CAMERA MODAL */}
+      {isCameraModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-md w-full shadow-2xl relative text-left flex flex-col gap-4">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-white font-bold text-base">Câmera ao Vivo</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  stopCamera();
+                  setIsCameraModalOpen(false);
+                }}
+                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Camera View / Captured Preview Area */}
+            <div className="relative rounded-2xl overflow-hidden bg-black aspect-[3/4] border border-slate-800 flex items-center justify-center">
+              {capturedPhotoUrl ? (
+                <img
+                  src={capturedPhotoUrl}
+                  alt="Foto tirada"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+              )}
+
+              {/* Flip camera switch */}
+              {!capturedPhotoUrl && (
+                <button
+                  type="button"
+                  onClick={toggleFacingMode}
+                  className="absolute top-3 right-3 p-2.5 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-slate-700 backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                  title="Inverter câmera"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Controls */}
+            {capturedPhotoUrl ? (
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCapturedPhotoUrl(null);
+                    setCapturedFile(null);
+                    startCamera(facingMode);
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Tirar Outra</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmCapturedPhoto}
+                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Usar Esta Foto</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={takeSnap}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-base transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
+                >
+                  <Camera className="w-5 h-5" />
+                  <span>Capturar Foto</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    stopCamera();
+                    setIsCameraModalOpen(false);
+                    cameraInputRef.current?.click();
+                  }}
+                  className="text-xs text-center text-slate-400 hover:text-amber-300 underline py-1"
+                >
+                  Usar Câmera Nativa do Dispositivo
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };
-
