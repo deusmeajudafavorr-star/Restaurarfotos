@@ -71,14 +71,15 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
           Para receber sua foto restaurada e o vídeo em alta qualidade, clique no botão abaixo.
         </p>
 
-        {/* Circled requested text callout */}
+        {/* Circled requested text callout - Vibrant WhatsApp Green */}
         <div className="mb-6">
           <button
             type="button"
             onClick={handleWhatsAppClick}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-300 hover:text-emerald-200 font-extrabold text-sm sm:text-base transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 animate-pulse"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-base sm:text-lg shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-95 cursor-pointer transition-all duration-200 animate-bounce"
+            style={{ animationDuration: '3s' }}
           >
-            <MessageSquare className="w-4 h-4 text-emerald-400 fill-emerald-400" />
+            <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
             <span>Clique aqui Receber no whatsapp</span>
           </button>
         </div>
