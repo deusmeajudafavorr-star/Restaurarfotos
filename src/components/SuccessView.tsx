@@ -85,7 +85,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
         </div>
 
         {/* Dynamic Order Number Display */}
-        <div className="mb-8 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 max-w-sm mx-auto flex items-center justify-between gap-3">
+        <div className="mb-6 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 max-w-sm mx-auto flex items-center justify-between gap-3">
           <div className="text-left">
             <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold block">
               Número do Pedido Gerado
@@ -97,7 +97,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
 
           <button
             onClick={handleCopyOrder}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1.5"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1.5 cursor-pointer"
             title="Copiar código do pedido"
           >
             {copied ? (
@@ -114,38 +114,11 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
           </button>
         </div>
 
-        {/* Restored Photo Thumbnail Confirmation (No Video Displayed as requested) */}
-        <div className="mb-8 max-w-xs mx-auto relative group">
-          <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/40 shadow-xl">
-            <img
-              src={imagePreviewUrl}
-              alt="Foto restaurada"
-              className="w-full h-48 object-cover filter brightness-105 contrast-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent flex items-end justify-center p-3">
-              <span className="text-xs font-bold text-emerald-300 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/40">
-                ✨ Foto Restaurada & Vídeo HD Prontos
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. & 5. REQUIRED GREEN WHATSAPP BUTTON */}
-        <div className="space-y-4 max-w-md mx-auto">
-          <button
-            onClick={handleWhatsAppClick}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-extrabold text-lg sm:text-xl shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer"
-          >
-            <MessageSquare className="w-6 h-6 fill-slate-950" />
-            <span>Receber no WhatsApp</span>
-          </button>
-
-          {/* Guarantee Subtext */}
-          <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5 font-medium">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Garantia de Satisfação: Só pague R$ 4,99 se aprovar o resultado</span>
-          </p>
-        </div>
+        {/* Guarantee Subtext */}
+        <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5 font-medium mb-6">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Garantia de Satisfação: Só pague R$ 4,99 se aprovar o resultado</span>
+        </p>
 
         {/* Reset / New Photo Action */}
         <div className="mt-10 pt-6 border-t border-slate-800">

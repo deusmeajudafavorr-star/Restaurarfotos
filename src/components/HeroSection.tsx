@@ -163,16 +163,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <span className="bg-emerald-500/25 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-400/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] font-black inline-block mx-0.5">
             Pague Se gostar
           </span>
-          , desbloqueie a versão completa por apenas{' '}
-          <span className="text-xs sm:text-sm font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-lg inline-block align-middle ml-1">
-            R$ 4,99
-          </span>
         </h1>
-
-        {/* 1. REQUIRED SUBTITLE */}
-        <p className="text-sm sm:text-base text-slate-300 font-medium max-w-xl mx-auto mb-4 leading-relaxed">
-          Envie sua foto abaixo e veja a prévia restaurada em segundos sem compromisso.
-        </p>
 
         {/* Ver Depoimentos Button */}
         <div className="mb-8 flex justify-center">
