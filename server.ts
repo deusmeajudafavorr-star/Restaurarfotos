@@ -18,7 +18,7 @@ async function startServer() {
   // Direct ImageKit API Upload Proxy
   app.post("/api/imagekit/upload", async (req, res) => {
     try {
-      const { fileBase64, fileName, orderId } = req.body;
+      const { fileBase64, fileName, orderId, clientPhone } = req.body;
 
       if (!fileBase64 || !fileName) {
         return res.status(400).json({
@@ -30,6 +30,8 @@ async function startServer() {
       // 1. Sanitize filename strictly: remove #, special symbols, spaces, accents
       const rawOrderId = orderId || "PEDIDO";
       const cleanOrder = rawOrderId.replace(/[^a-zA-Z0-9]/g, "");
+      const cleanClientPhone = (clientPhone || "").replace(/\D/g, "");
+      const phoneTag = cleanClientPhone ? `tel_${cleanClientPhone}` : "SemTel";
       
       const sanitizedOriginalName = fileName
         .normalize("NFD")
@@ -37,7 +39,8 @@ async function startServer() {
         .replace(/[^a-zA-Z0-9._-]/g, "_") // replace remaining non-alphanumeric with _
         .replace(/_+/g, "_"); // condense consecutive underscores
 
-      const finalFileName = `pedido_${cleanOrder}_${sanitizedOriginalName}`;
+      // Title put phone number right upfront in filename so it shows in ImageKit UI
+      const finalFileName = `pedido_${phoneTag}_${cleanOrder}_${sanitizedOriginalName}`;
 
       // 2. Prepare Private Key Basic Auth
       const privateKey =
@@ -51,7 +54,7 @@ async function startServer() {
       formData.append("fileName", finalFileName);
       formData.append("folder", "/restaurador-pedidos");
       formData.append("useUniqueFileName", "true");
-      formData.append("tags", `pedido_${cleanOrder}`);
+      formData.append("tags", cleanClientPhone ? `pedido_${cleanOrder},tel_${cleanClientPhone}` : `pedido_${cleanOrder}`);
 
       // 4. Call ImageKit API
       const ikResponse = await fetch(

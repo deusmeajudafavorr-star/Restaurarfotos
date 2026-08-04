@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { ProcessingView } from './components/ProcessingView';
@@ -12,9 +12,13 @@ import { Sparkles, Shield, HelpCircle, Cloud } from 'lucide-react';
 
 export default function App() {
   const [step, setStep] = useState<AppStep>('upload');
-  const [, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [currentOrderCode, setCurrentOrderCode] = useState<string>('');
+  const [clientPhone, setClientPhone] = useState<string>('');
+
+  // Track if upload has already been performed for the current order
+  const hasUploadedRef = useRef<boolean>(false);
 
   // Default WhatsApp phone number
   const [whatsappNumber, setWhatsappNumber] = useState<string>('5588996056407');
@@ -25,11 +29,17 @@ export default function App() {
   // Modals state
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  // Helper for performing upload to ImageKit
-  const performImageKitUpload = async (file: File, orderCode: string) => {
+  // Helper for performing upload to ImageKit (ensures ONLY 1 upload per order)
+  const performImageKitUpload = async (file: File, orderCode: string, phone?: string) => {
+    if (hasUploadedRef.current) {
+      return; // Already uploaded for this order!
+    }
+
+    hasUploadedRef.current = true;
     setImageKitStatus({ isUploading: true });
+
     try {
-      const result = await uploadToImageKit(file, file.name, orderCode);
+      const result = await uploadToImageKit(file, file.name, orderCode, phone);
       if (result.success) {
         setImageKitStatus({
           isUploading: false,
@@ -53,6 +63,7 @@ export default function App() {
 
   // 1. Photo Selection Handler
   const handlePhotoSelected = async (file: File) => {
+    hasUploadedRef.current = false;
     setSelectedFile(file);
     const previewUrl = URL.createObjectURL(file);
     setImagePreviewUrl(previewUrl);
@@ -62,13 +73,17 @@ export default function App() {
 
     // 2. Start processing flow automatically
     setStep('processing');
-
-    // Automatically upload to ImageKit CDN
-    performImageKitUpload(file, newOrderCode);
   };
 
-  // 3. Complete 6-second Processing -> Success Transition
+  const handleClientPhoneChange = (phone: string) => {
+    setClientPhone(phone);
+  };
+
+  // 3. Complete Processing -> Success Transition (Uploads once with complete phone)
   const handleProcessingComplete = () => {
+    if (selectedFile && currentOrderCode) {
+      performImageKitUpload(selectedFile, currentOrderCode, clientPhone);
+    }
     setStep('success');
   };
 
@@ -77,6 +92,8 @@ export default function App() {
     setStep('upload');
     setSelectedFile(null);
     setCurrentOrderCode('');
+    setClientPhone('');
+    hasUploadedRef.current = false;
     if (imagePreviewUrl) {
       URL.revokeObjectURL(imagePreviewUrl);
       setImagePreviewUrl(null);
@@ -102,6 +119,8 @@ export default function App() {
         {step === 'processing' && imagePreviewUrl && (
           <ProcessingView
             imagePreviewUrl={imagePreviewUrl}
+            clientPhone={clientPhone}
+            onClientPhoneChange={handleClientPhoneChange}
             onComplete={handleProcessingComplete}
           />
         )}
@@ -110,6 +129,7 @@ export default function App() {
           <SuccessView
             imagePreviewUrl={imagePreviewUrl}
             whatsappNumber={whatsappNumber}
+            clientPhone={clientPhone}
             imageKitStatus={imageKitStatus}
             orderCode={currentOrderCode}
             onReset={handleReset}

@@ -7,6 +7,7 @@ import { ImageKitStatus } from '../types';
 interface SuccessViewProps {
   imagePreviewUrl: string;
   whatsappNumber: string;
+  clientPhone?: string;
   imageKitStatus?: ImageKitStatus;
   orderCode: string;
   onReset: () => void;
@@ -15,6 +16,7 @@ interface SuccessViewProps {
 export const SuccessView: React.FC<SuccessViewProps> = ({
   imagePreviewUrl,
   whatsappNumber,
+  clientPhone,
   imageKitStatus,
   orderCode,
   onReset,
@@ -36,7 +38,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
   }, []);
 
   const handleWhatsAppClick = () => {
-    const url = buildWhatsAppUrl(whatsappNumber, orderCode, imageKitStatus?.uploadedUrl);
+    const url = buildWhatsAppUrl(whatsappNumber, orderCode, imageKitStatus?.uploadedUrl, clientPhone);
     window.open(url, '_blank');
   };
 
@@ -61,43 +63,51 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
           </div>
         </div>
 
-        {/* 4. REQUIRED HEADING */}
+        {/* Success Announcement */}
         <h2 className="text-2xl sm:text-4xl font-black text-white mb-3 tracking-tight">
-          🎉 Seu vídeo foi gerado com sucesso!
+          🎉 Pedido Confirmado!
         </h2>
 
-        {/* 4. REQUIRED TEXT */}
-        <p className="text-slate-200 text-base sm:text-lg font-medium max-w-lg mx-auto mb-3 leading-relaxed">
-          Para receber sua foto restaurada e o vídeo em alta qualidade, clique no botão abaixo.
-        </p>
+        {/* User requested primary message */}
+        <div className="p-4 sm:p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 max-w-lg mx-auto mb-6">
+          <p className="text-emerald-300 text-lg sm:text-xl font-black leading-relaxed">
+            Você receberá o vídeo em instantes no seu WhatsApp, fique ligado!
+          </p>
+          {clientPhone && (
+            <p className="text-xs text-slate-300 mt-2 font-mono">
+              📱 Telefone cadastrado: <strong className="text-emerald-400 font-bold">{clientPhone}</strong>
+            </p>
+          )}
+        </div>
 
-        {/* Circled requested text callout - Vibrant WhatsApp Green */}
+        {/* Optional direct WhatsApp button fallback */}
         <div className="mb-6">
           <button
             type="button"
             onClick={handleWhatsAppClick}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-base sm:text-lg shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-95 cursor-pointer transition-all duration-200 animate-bounce"
-            style={{ animationDuration: '3s' }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-base sm:text-lg shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-95 cursor-pointer transition-all duration-200"
           >
             <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
-            <span>Clique aqui Receber no whatsapp</span>
+            <span>Falar com Atendimento no WhatsApp</span>
           </button>
         </div>
 
         {/* Dynamic Order Number Display */}
-        <div className="mb-6 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 max-w-sm mx-auto flex items-center justify-between gap-3">
-          <div className="text-left">
-            <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold block">
-              Número do Pedido Gerado
-            </span>
-            <span className="text-xl font-mono font-black text-amber-400 tracking-wider">
-              {orderCode}
-            </span>
+        <div className="mb-6 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 max-w-sm mx-auto flex items-center justify-between gap-3 text-left">
+          <div className="space-y-1">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold block">
+                Número do Pedido Gerado
+              </span>
+              <span className="text-xl font-mono font-black text-amber-400 tracking-wider">
+                {orderCode}
+              </span>
+            </div>
           </div>
 
           <button
             onClick={handleCopyOrder}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1.5 cursor-pointer"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1.5 cursor-pointer shrink-0"
             title="Copiar código do pedido"
           >
             {copied ? (
@@ -113,12 +123,6 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
             )}
           </button>
         </div>
-
-        {/* Guarantee Subtext */}
-        <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5 font-medium mb-6">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Garantia de Satisfação: Só pague R$ 4,99 se aprovar o resultado</span>
-        </p>
 
         {/* Reset / New Photo Action */}
         <div className="mt-10 pt-6 border-t border-slate-800">

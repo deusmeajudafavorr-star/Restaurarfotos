@@ -39,11 +39,14 @@ function fileToBase64(file: File | Blob): Promise<string> {
 async function uploadDirectToImageKit(
   file: File | Blob,
   fileName: string,
-  orderId?: string
+  orderId?: string,
+  clientPhone?: string
 ): Promise<ImageKitUploadResult> {
   try {
     const rawOrderId = orderId || "PEDIDO";
     const cleanOrder = rawOrderId.replace(/[^a-zA-Z0-9]/g, "");
+    const cleanClientPhone = (clientPhone || "").replace(/\D/g, "");
+    const phoneTag = cleanClientPhone ? `tel_${cleanClientPhone}` : "SemTel";
 
     const sanitizedOriginalName = fileName
       .normalize("NFD")
@@ -51,7 +54,7 @@ async function uploadDirectToImageKit(
       .replace(/[^a-zA-Z0-9._-]/g, "_")
       .replace(/_+/g, "_");
 
-    const finalFileName = `pedido_${cleanOrder}_${sanitizedOriginalName}`;
+    const finalFileName = `pedido_${phoneTag}_${cleanOrder}_${sanitizedOriginalName}`;
 
     const privateKey =
       (import.meta as any).env?.VITE_IMAGEKIT_PRIVATE_KEY ||
@@ -64,7 +67,7 @@ async function uploadDirectToImageKit(
     formData.append("fileName", finalFileName);
     formData.append("folder", "/restaurador-pedidos");
     formData.append("useUniqueFileName", "true");
-    formData.append("tags", `pedido_${cleanOrder}`);
+    formData.append("tags", cleanClientPhone ? `pedido_${cleanOrder},tel_${cleanClientPhone}` : `pedido_${cleanOrder}`);
 
     const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
       method: "POST",
@@ -105,7 +108,8 @@ async function uploadDirectToImageKit(
 export async function uploadToImageKit(
   file: File | Blob,
   fileName: string,
-  orderId?: string
+  orderId?: string,
+  clientPhone?: string
 ): Promise<ImageKitUploadResult> {
   // 1. Tentar primeiro o endpoint de API do servidor (/api/imagekit/upload)
   try {
@@ -120,6 +124,7 @@ export async function uploadToImageKit(
         fileBase64,
         fileName,
         orderId,
+        clientPhone,
       }),
     });
 
@@ -144,5 +149,5 @@ export async function uploadToImageKit(
   }
 
   // 2. Fallback direto no cliente (garante funcionamento no Vercel e hosts estáticos)
-  return uploadDirectToImageKit(file, fileName, orderId);
+  return uploadDirectToImageKit(file, fileName, orderId, clientPhone);
 }
